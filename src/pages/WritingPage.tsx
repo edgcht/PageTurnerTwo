@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Save, Eye, Share2, MoreHorizontal, Plus, FileText, Folder } from 'lucide-react';
+import { Save, Eye, Share2, MoreHorizontal, Plus } from 'lucide-react';
 import { PageType } from '../App';
 import { RichTextEditor } from '../components/RichTextEditor';
 import { ChapterList } from '../components/ChapterList';
+import { CreateBookModal } from '../components/CreateBookModal';
 import { useBooks, useChapters } from '../hooks/useBooks';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -12,13 +13,14 @@ interface WritingPageProps {
 
 export const WritingPage: React.FC<WritingPageProps> = ({ onNavigate }) => {
   const { user, profile } = useAuth();
-  const { books, fetchBooks, createBook } = useBooks();
+  const { books, fetchBooks } = useBooks();
   const { chapters, fetchChapters, createChapter, updateChapter } = useChapters();
   
   const [selectedChapter, setSelectedChapter] = useState<string>('1');
   const [showChapterList, setShowChapterList] = useState(true);
   const [content, setContent] = useState('');
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
+  const [showBookModal, setShowBookModal] = useState(false);
 
   React.useEffect(() => {
     if (user) {
@@ -46,6 +48,11 @@ export const WritingPage: React.FC<WritingPageProps> = ({ onNavigate }) => {
     });
   };
 
+  const handleBookCreated = (id: string) => {
+    setSelectedBook(id);
+    setShowBookModal(false);
+  };
+
   if (!user) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -62,18 +69,41 @@ export const WritingPage: React.FC<WritingPageProps> = ({ onNavigate }) => {
   }
 
   return (
+    <>
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       {/* Sidebar - Chapter List */}
       {showChapterList && (
         <div className="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              {currentBook?.title || 'Select a Book'}
-            </h2>
-            <button className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center">
-              <Plus className="h-4 w-4 mr-2" />
-              New Chapter
-            </button>
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700 space-y-2">
+            <select
+              value={selectedBook || ''}
+              onChange={e => setSelectedBook(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            >
+              <option value="" disabled>
+                Select a Book
+              </option>
+              {books.map(book => (
+                <option key={book.id} value={book.id}>
+                  {book.title}
+                </option>
+              ))}
+            </select>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setShowBookModal(true)}
+                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                New Book
+              </button>
+              {currentBook && (
+                <button className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Chapter
+                </button>
+              )}
+            </div>
           </div>
           
           {currentBook && (
@@ -146,5 +176,11 @@ export const WritingPage: React.FC<WritingPageProps> = ({ onNavigate }) => {
         </div>
       </div>
     </div>
+    <CreateBookModal
+      isOpen={showBookModal}
+      onClose={() => setShowBookModal(false)}
+      onCreated={handleBookCreated}
+    />
+  </>
   );
 };
