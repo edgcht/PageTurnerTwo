@@ -8,6 +8,7 @@ import { BookPage } from './pages/BookPage';
 import { CommunityPage } from './pages/CommunityPage';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 
 export type PageType = 'home' | 'writing' | 'discovery' | 'profile' | 'book' | 'community';
 
@@ -35,16 +36,18 @@ function App() {
   };
 
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-          <Navigation currentPage={currentPage} onNavigate={setCurrentPage} />
-          <main className="pt-16">
-            {renderPage()}
-          </main>
-        </div>
-      </AuthProvider>
-    </ThemeProvider>
+    <LanguageProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+            <Navigation currentPage={currentPage} onNavigate={setCurrentPage} />
+            <main className="pt-16">
+              {renderPage()}
+            </main>
+          </div>
+        </AuthProvider>
+      </ThemeProvider>
+    </LanguageProvider>
   );
 }
 

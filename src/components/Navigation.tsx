@@ -2,6 +2,7 @@ import React from 'react';
 import { Book, Home, Search, User, Users, PenTool, Bell, Settings, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { PageType } from '../App';
 import { AuthModal } from './AuthModal';
 
@@ -13,13 +14,14 @@ interface NavigationProps {
 export const Navigation: React.FC<NavigationProps> = ({ currentPage, onNavigate }) => {
   const { user, profile, signIn, signOut, loading } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { language, setLanguage, t } = useLanguage();
   const [showAuthModal, setShowAuthModal] = React.useState(false);
 
   const navItems = [
-    { id: 'home', label: 'Home', icon: Home },
-    { id: 'discovery', label: 'Discover', icon: Search },
-    { id: 'writing', label: 'Write', icon: PenTool },
-    { id: 'community', label: 'Community', icon: Users },
+    { id: 'home', label: t('home'), icon: Home },
+    { id: 'discovery', label: t('discover'), icon: Search },
+    { id: 'writing', label: t('write'), icon: PenTool },
+    { id: 'community', label: t('community'), icon: Users },
   ];
 
   return (
@@ -56,11 +58,20 @@ export const Navigation: React.FC<NavigationProps> = ({ currentPage, onNavigate 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-4">
             <button
-              onClick={() => setShowAuthModal(true)}
+              onClick={toggleTheme}
               className="p-2 rounded-md text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             >
               {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </button>
+
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as 'en' | 'fr')}
+              className="bg-transparent border border-gray-300 dark:border-gray-600 text-sm rounded-md p-1"
+            >
+              <option value="en">EN</option>
+              <option value="fr">FR</option>
+            </select>
 
             {user && profile ? (
               <div className="flex items-center space-x-3">
@@ -82,15 +93,15 @@ export const Navigation: React.FC<NavigationProps> = ({ currentPage, onNavigate 
                   onClick={signOut}
                   className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
                 >
-                  Logout
+                  {t('logout')}
                 </button>
               </div>
             ) : !loading && (
               <button
-                onClick={() => {/* TODO: Open login modal */}}
+                onClick={() => setShowAuthModal(true)}
                 className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
               >
-                Sign In
+                {t('signIn')}
               </button>
             )}
           </div>

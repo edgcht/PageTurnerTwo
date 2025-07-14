@@ -2,6 +2,7 @@ import React from 'react';
 import { TrendingUp, Clock, Star, Users, BookOpen, Award } from 'lucide-react';
 import { PageType } from '../App';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface HomePageProps {
   onNavigate: (page: PageType) => void;
@@ -9,6 +10,7 @@ interface HomePageProps {
 
 export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const featuredBooks = [
     {
@@ -55,7 +57,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       {/* Hero Section */}
       <div className="text-center mb-16">
         <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-          Where Stories Come to Life
+          {t('heroTitle')}
         </h1>
         <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
           Join a vibrant community of writers who collaborate, critique, and celebrate storytelling. 
@@ -66,13 +68,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             onClick={() => onNavigate('writing')}
             className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
           >
-            Start Writing Today
+            {t('heroWriteCTA')}
           </button>
           <button
             onClick={() => onNavigate('discovery')}
             className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-8 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-semibold"
           >
-            Discover Amazing Stories
+            {t('heroDiscoverCTA')}
           </button>
         </div>
       </div>
