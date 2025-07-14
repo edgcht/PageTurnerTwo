@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Save, Eye, Share2, MoreHorizontal, Plus, FileText, Folder } from 'lucide-react';
+import { Save, Eye, Share2, MoreHorizontal, Plus } from 'lucide-react';
 import { PageType } from '../App';
 import { RichTextEditor } from '../components/RichTextEditor';
 import { ChapterList } from '../components/ChapterList';
+import { BookFormModal } from '../components/BookFormModal';
+import { ChapterFormModal } from '../components/ChapterFormModal';
 import { useBooks, useChapters } from '../hooks/useBooks';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -13,12 +15,14 @@ interface WritingPageProps {
 export const WritingPage: React.FC<WritingPageProps> = ({ onNavigate }) => {
   const { user, profile } = useAuth();
   const { books, fetchBooks, createBook } = useBooks();
-  const { chapters, fetchChapters, createChapter, updateChapter } = useChapters();
-  
-  const [selectedChapter, setSelectedChapter] = useState<string>('1');
+  const { chapters, fetchChapters, createChapter, updateChapter } = useChapters(selectedBook || undefined);
+
+  const [selectedChapter, setSelectedChapter] = useState<string | null>(null);
   const [showChapterList, setShowChapterList] = useState(true);
   const [content, setContent] = useState('');
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
+  const [showBookModal, setShowBookModal] = useState(false);
+  const [showChapterModal, setShowChapterModal] = useState(false);
 
   React.useEffect(() => {
     if (user) {
@@ -32,7 +36,39 @@ export const WritingPage: React.FC<WritingPageProps> = ({ onNavigate }) => {
     }
   }, [selectedBook]);
 
+  React.useEffect(() => {
+    if (chapters.length > 0 && !selectedChapter) {
+      setSelectedChapter(chapters[0].id);
+    }
+  }, [chapters]);
+
   const currentBook = books.find(book => book.id === selectedBook);
+
+  const handleCreateBook = async (data: any) => {
+    if (!user) return;
+    const { data: newBook } = await createBook({
+      ...data,
+      author_id: user.id,
+      status: 'draft',
+      visibility: 'private'
+    });
+    if (newBook) {
+      setSelectedBook(newBook.id);
+    }
+  };
+
+  const handleCreateChapter = async (data: any) => {
+    if (!currentBook) return;
+    const { data: newChapter } = await createChapter({
+      ...data,
+      book_id: currentBook.id,
+      chapter_number: chapters.length + 1,
+      status: 'draft'
+    });
+    if (newChapter) {
+      setSelectedChapter(newChapter.id);
+    }
+  };
 
   const handleSaveChapter = async () => {
     if (!selectedChapter || !currentBook) return;
@@ -66,14 +102,35 @@ export const WritingPage: React.FC<WritingPageProps> = ({ onNavigate }) => {
       {/* Sidebar - Chapter List */}
       {showChapterList && (
         <div className="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              {currentBook?.title || 'Select a Book'}
-            </h2>
-            <button className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center">
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700 space-y-2">
+            <select
+              value={selectedBook || ''}
+              onChange={(e) => setSelectedBook(e.target.value || null)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            >
+              <option value="">Select a Book</option>
+              {books.map((book) => (
+                <option key={book.id} value={book.id}>
+                  {book.title}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={() => setShowBookModal(true)}
+              className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+            >
               <Plus className="h-4 w-4 mr-2" />
-              New Chapter
+              New Book
             </button>
+            {currentBook && (
+              <button
+                onClick={() => setShowChapterModal(true)}
+                className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                New Chapter
+              </button>
+            )}
           </div>
           
           {currentBook && (
@@ -145,6 +202,16 @@ export const WritingPage: React.FC<WritingPageProps> = ({ onNavigate }) => {
           </div>
         </div>
       </div>
+      <BookFormModal
+        isOpen={showBookModal}
+        onClose={() => setShowBookModal(false)}
+        onCreate={handleCreateBook}
+      />
+      <ChapterFormModal
+        isOpen={showChapterModal}
+        onClose={() => setShowChapterModal(false)}
+        onCreate={handleCreateChapter}
+      />
     </div>
   );
 };
