@@ -13,7 +13,7 @@ interface WritingPageProps {
 
 export const WritingPage: React.FC<WritingPageProps> = ({ onNavigate }) => {
   const { user, profile } = useAuth();
-  const { books, fetchBooks } = useBooks();
+  const { books, fetchBooks, createBook } = useBooks();
   const { chapters, fetchChapters, createChapter, updateChapter } = useChapters();
   
   const [selectedChapter, setSelectedChapter] = useState<string>('1');
@@ -180,6 +180,7 @@ export const WritingPage: React.FC<WritingPageProps> = ({ onNavigate }) => {
       isOpen={showBookModal}
       onClose={() => setShowBookModal(false)}
       onCreated={handleBookCreated}
+      createBook={createBook}
     />
   </>
   );

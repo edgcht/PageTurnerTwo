@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { X, Book, Tag } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useBooks } from '../hooks/useBooks';
+import { Database } from '../lib/database.types';
 
 interface CreateBookModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCreated?: (bookId: string) => void;
+  createBook: (
+    book: Database['public']['Tables']['books']['Insert']
+  ) => Promise<{ data: Database['public']['Tables']['books']['Row'] | null; error: any }>;
 }
 
-export const CreateBookModal: React.FC<CreateBookModalProps> = ({ isOpen, onClose, onCreated }) => {
+export const CreateBookModal: React.FC<CreateBookModalProps> = ({ isOpen, onClose, onCreated, createBook }) => {
   const { user } = useAuth();
-  const { createBook } = useBooks();
   const [formData, setFormData] = useState({ title: '', genre: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
